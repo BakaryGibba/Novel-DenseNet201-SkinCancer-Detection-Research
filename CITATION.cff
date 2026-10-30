@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper below."
+title: "DenseNet201 with Squeeze-and-Excitation for skin lesion classification"
+type: software
+authors:
+  - given-names: Bakary
+    family-names: Gibba
+    orcid: "https://orcid.org/0009-0001-3191-3975"
+repository-code: "https://github.com/BakaryGibba/Novel-DenseNet201-SkinCancer-Detection-Research"
+license: MIT
+preferred-citation:
+  type: conference-paper
+  title: "Skin Lesion Classification with Explainable AI to Enhancing Dermatological Diagnosis"
+  authors:
+    - given-names: Md Serajun
+      family-names: Nabi
+    - given-names: Md Rashidul
+      family-names: Islam
+    - given-names: Bakary
+      family-names: Gibba
+      orcid: "https://orcid.org/0009-0001-3191-3975"
+    - given-names: Raihana
+      family-names: Mohammadi
+    - given-names: M.
+      family-names: Touhami
+    - given-names: M. F.
+      family-names: Ahmad Fauzi
+  collection-title: "2025 Multimedia University Engineering Conference (MECON)"
+  publisher:
+    name: IEEE
+  start: 1
+  end: 6
+  doi: "10.1109/MECON67253.2025.11277079"
+  year: 2025

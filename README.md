@@ -1,89 +1,96 @@
-![Skin Cancer Illustration](https://media.istockphoto.com/id/1394087536/vector/skin-cancer-concept.jpg?s=612x612&w=0&k=20&c=79hlaj3WkcN67UkBZWoeHCnexXH86SDWoUkGId7e7Gs=)
+<div align="center">
 
+# DenseNet201 with Squeeze-and-Excitation for Skin Lesion Classification
 
+**Experimental notebook from the research behind *Skin Lesion Classification with Explainable AI to Enhancing Dermatological Diagnosis* (IEEE MECON 2025).**
 
-# DenseNet201 Novel Model for Skin Lesion Classification
+[![DOI](https://img.shields.io/badge/DOI-10.1109%2FMECON67253.2025.11277079-1D4ED8)](https://doi.org/10.1109/MECON67253.2025.11277079)
+[![Status](https://img.shields.io/badge/status-published-0F766E)](#publication)
+[![Framework](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![License](https://img.shields.io/badge/license-MIT-0F766E)](LICENSE)
 
-This repository presents a deep learning model developed as part of a research study titled:
+</div>
 
-**"Skin Lesion Classification with Explainable AI to Enhance Dermatological Diagnosis"**
+> [!IMPORTANT]
+> This is research code, not a diagnostic tool. It must not be used for clinical decisions.
 
-The work integrates **DenseNet201 with Squeeze-and-Excitation (SE) blocks** and employs **Explainable AI (XAI)** techniques to classify skin lesions from MRI images. The model is trained and evaluated on the [PH² Skin Cancer MRI Dataset](https://www.kaggle.com/datasets/rashidul0/ph2-skin-cancer-classification), targeting more transparent and accurate clinical decision support.
+## Publication
 
+**Skin Lesion Classification with Explainable AI to Enhancing Dermatological Diagnosis**
+Md Serajun Nabi, Md Rashidul Islam, Bakary Gibba, Raihana Mohammadi, M. Touhami, M. F. Ahmad Fauzi
+*2025 Multimedia University Engineering Conference (MECON)*, IEEE, pp. 1–6. [doi:10.1109/MECON67253.2025.11277079](https://doi.org/10.1109/MECON67253.2025.11277079)
 
-## 🧠 Overview of the Model
+This repository contains the DenseNet201 + SE classification experiment. The explainability (XAI) analysis reported in the paper is not included in this notebook.
 
-Our architecture is grounded in **DenseNet201**, known for its efficient feature reuse and gradient flow. To improve discriminative ability, we embedded **SE blocks** that perform dynamic channel-wise feature recalibration, strengthening the network’s attention to informative features while suppressing noise.
+## Dataset
 
-The model architecture is enhanced further with **Explainable AI methods** such as Grad-CAM to visualize and understand the regions influencing model predictions. This promotes transparency and increases trustworthiness in clinical applications.
+[PH² dermoscopic image dataset](https://www.kaggle.com/datasets/rashidul0/ph2-skin-cancer-classification): 200 dermoscopy images in three classes, namely 80 common nevi, 80 atypical nevi and 40 melanomas. The dataset is not redistributed here.
 
+## Method
 
-## 📂 Dataset Used
+| Component | Details |
+| --- | --- |
+| Backbone | DenseNet201, ImageNet-pretrained (torchvision) |
+| Attention | Squeeze-and-Excitation block (reduction 8) on the 1920-channel feature map |
+| Loss | Focal loss for class imbalance |
+| Augmentation | Offline: original plus 10 augmented copies per image (2,200 images: 880 / 880 / 440). Online: Mixup |
+| Optimisation | OneCycleLR schedule, dropout, early stopping (patience 7), up to 50 epochs |
+| Input | 224 × 224 RGB, ImageNet normalisation |
+| Split | Random 80/20 split of the augmented set (`manual_seed(42)`) |
 
-We utilize the **PH² Skin Lesion MRI Dataset**, which contains annotated dermatological images from clinical cases:
+## Results
 
-📌 [PH² Dataset on Kaggle](https://www.kaggle.com/datasets/rashidul0/ph2-skin-cancer-classification)
+Test set: 440 images from the augmented dataset.
 
-All images were resized, normalized, and augmented before feeding into the model.
+| Class | Precision | Recall | F1 | Support |
+| --- | ---: | ---: | ---: | ---: |
+| Atypical nevus | 0.86 | 0.92 | 0.89 | 181 |
+| Common nevus | 0.92 | 0.85 | 0.89 | 169 |
+| Melanoma | 0.98 | 0.98 | 0.98 | 90 |
+| **Accuracy** | | | **0.91** | 440 |
+| Macro average | 0.92 | 0.92 | 0.92 | 440 |
 
----
+<img src="figures/confusion-matrix.png" alt="Confusion matrix: 0 = atypical nevus, 1 = common nevus, 2 = melanoma" width="360">
 
-## 💡 Key Contributions
+Labels follow torchvision's alphabetical folder order: 0 = atypical nevus, 1 = common nevus, 2 = melanoma. Most errors are between the two nevus classes, which are also the hardest to separate clinically.
 
-- **DenseNet201-Backbone**: Powerful pre-trained feature extractor for medical imaging.
-- **Squeeze-and-Excitation (SE) Blocks**: Attention mechanisms that adaptively emphasize important channels.
-- **Explainability with Grad-CAM**: Post-hoc visualization to identify lesion regions critical for classification.
-- **3-Class Diagnostic Support**: Accurate prediction across common lesion categories.
-- **End-to-End Pipeline**: Preprocessing, training, evaluation, and explanation in one modular codebase.
+### Notes on evaluation
 
----
+- The 80/20 split is drawn **after** offline augmentation, so augmented copies of the same lesion can appear in both training and test sets. This likely makes the reported accuracy optimistic. Splitting by original image before augmentation, or cross-validating at image level, would give a stricter estimate.
+- PH² is small (200 images) and comes from a single clinical source, so results may not transfer to other dermoscopy devices or populations.
 
-## 🚀 How to Use
+## Repository Contents
 
-Clone the repo and install dependencies:
+| File | Purpose |
+| --- | --- |
+| [`densenet201-se-skin-lesion.ipynb`](densenet201-se-skin-lesion.ipynb) | Augmentation, model, training and evaluation (Kaggle notebook) |
+| [`figures/`](figures/) | Confusion matrix exported from the notebook |
+| [`CITATION.cff`](CITATION.cff) | Citation metadata for the paper |
 
-```bash
-git clone https://github.com/your-username/skin-lesion-densenet201-se-xai.git
-cd skin-lesion-densenet201-se-xai
-pip install -r requirements.txt
-````
+## Reproducing
 
-To train:
+The notebook was run on Kaggle with the PH² dataset attached as an input. To run it elsewhere, update `ORIG_DATA_DIR` and `AUG_DATA_DIR` in the notebook.
 
-```bash
-python train.py --epochs 30 --batch_size 32
+## Citation
+
+```bibtex
+@inproceedings{nabi2025skin,
+  author = {Md Serajun Nabi and Md Rashidul Islam and Bakary Gibba and Raihana Mohammadi and M. Touhami and M. F. Ahmad Fauzi},
+  title = {Skin Lesion Classification with Explainable AI to Enhancing Dermatological Diagnosis},
+  booktitle = {2025 Multimedia University Engineering Conference (MECON)},
+  pages = {1--6},
+  year = {2025},
+  publisher = {IEEE},
+  doi = {10.1109/MECON67253.2025.11277079}
+}
 ```
 
-To generate XAI visualizations:
-
-```bash
-python grad_cam.py --image sample.jpg --model saved_model.pth
-```
-
 ---
 
-## 🤝 Contributions Welcome
+<div align="center">
 
-We invite researchers, students, and developers interested in medical AI to contribute to this project. Whether you're exploring better attention mechanisms, alternative explainability techniques, or even deployment tools, your ideas are welcome!
+**Part of [Bakary Gibba's AI engineering portfolio](https://github.com/BakaryGibba/bakary-gibba-ai-engineering-portfolio)**
 
-To contribute:
+[Portfolio website](https://bakary-gibba.vercel.app/) · [LinkedIn](https://www.linkedin.com/in/bakary-gibba-6409bb248/) · [Google Scholar](https://scholar.google.com/citations?user=bp0G4sgAAAAJ&hl=en)
 
-1. Fork the repo.
-2. Create a feature branch.
-3. Submit a pull request with your changes.
-
-For academic collaboration or integration into clinical pipelines, please contact us directly.
-
----
-
-## 📜 License
-
-This research code is released under the MIT License.
-
-**Maintained by**: Bakary Gibba
-
-**Institution**: Albukhary International University
-
-**Field**: AI for Medical Imaging and Diagnostics
-
-```
+</div>
